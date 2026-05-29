@@ -1,0 +1,36 @@
+﻿@* Khai báo kiểu dữ liệu mà Controller sẽ truyền sang View *@
+@model IEnumerable<CMS.data.Entities.Category>
+
+@{
+    ViewData["Title"] = "Danh sách Danh mục";
+}
+
+<h1>Danh sách Category</h1>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên Danh Mục</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* Vòng lặp để in từng dòng dữ liệu trong Database ra màn hình *@
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">Chưa có dữ liệu nào!</td>
+            </tr>
+        }
+    </tbody>
+</table>
