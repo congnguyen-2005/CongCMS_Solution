@@ -1,0 +1,28 @@
+﻿@model IEnumerable<CMS.data.Entities.CategoryProduct>
+@{
+    ViewData["Title"] = "Danh mục - Sản phẩm";
+}
+
+<h3>DANH MỤC - SẢN PHẨM</h3>
+<table class="table table-bordered table-striped">
+    <thead class="bg-primary text-white">
+        <tr>
+            <th>ID</th>
+            <th>Tên (Name)</th>
+            <th>Mô tả (Description)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

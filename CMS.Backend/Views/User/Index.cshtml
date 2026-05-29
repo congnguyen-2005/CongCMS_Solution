@@ -1,0 +1,72 @@
+﻿@model IEnumerable<CMS.data.Entities.User>
+
+@{
+    ViewData["Title"] = "Quản lý thành viên";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary font-weight-bold m-0">QUẢN LÝ DANH SÁCH THÀNH VIÊN</h3>
+        <button class="btn btn-success btn-sm"><i class="fas fa-user-plus"></i> Thêm thành viên mới</button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered mb-0">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th style="width: 8%">STT</th>
+                            <th style="width: 20%">Tài khoản (Username)</th>
+                            <th style="width: 35%">Họ và tên (Fullname)</th>
+                            <th style="width: 20%">Vai trò (Role)</th>
+                            <th style="width: 17%" class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int stt = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(stt++)</td>
+                                    <td class="font-weight-bold text-dark">@item.Username</td>
+
+                                    <td>@item.Fullname</td>
+
+                                    <td>
+                                        @if (item.Role == "Administrator")
+                                        {
+                                            <span class="badge bg-danger text-white">Administrator</span>
+                                        }
+                                        else if (item.Role == "Editor")
+                                        {
+                                            <span class="badge bg-info text-white">Editor</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary text-white">@(item.Role ?? "User")</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-secondary" title="Sửa"><i class="fas fa-edit"></i> Sửa</button>
+                                        <button class="btn btn-sm btn-outline-danger" title="Xóa"><i class="fas fa-trash"></i> Xóa</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted p-4">
+                                    Không có dữ liệu thành viên nào trong hệ thống.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

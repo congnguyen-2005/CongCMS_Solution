@@ -1,0 +1,36 @@
+﻿@model IEnumerable<CMS.data.Entities.OrderDetail>
+@{
+    ViewData["Title"] = "Chi tiết Đơn hàng";
+}
+
+<h3 class="text-danger mb-3">CHI TIẾT ĐƠN HÀNG</h3>
+<table class="table table-bordered table-striped shadow-sm">
+    <thead class="bg-danger text-white">
+        <tr>
+            <th>ID</th>
+            <th>Mã đơn hàng</th>
+            <th>Mã sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.OrderId</td>
+                    <td>@item.ProductId</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-center">Chưa có chi tiết đơn hàng nào.</td></tr>
+        }
+    </tbody>
+</table>

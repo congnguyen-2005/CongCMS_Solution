@@ -1,0 +1,43 @@
+﻿@model IEnumerable<CMS.data.Entities.Post>
+
+@{
+    ViewData["Title"] = "Danh sách bài viết";
+}
+
+<h3 class="text-danger mb-4 mt-3">DANH SÁCH BÀI VIẾT MỚI NHẤT</h3>
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Title" style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
+
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="#" class="text-decoration-none" style="color: #007bff;">@item.Title</a>
+                        </h5>
+
+                        <p class="card-text text-muted mb-2">
+                            @item.Content
+                        </p>
+
+                        <p class="card-text mb-3">
+                            <small class="text-muted">Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")</small>
+                        </p>
+
+                        <a href="#" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info">Chưa có bài viết nào trong cơ sở dữ liệu.</div>
+        </div>
+    }
+</div>
