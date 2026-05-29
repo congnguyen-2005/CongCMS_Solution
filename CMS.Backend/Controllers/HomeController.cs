@@ -1,22 +1,41 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using CMS.Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+// THÊM 3 DÒNG USING NÀY VÀO
+using Microsoft.EntityFrameworkCore;
+using CMS.data;
+using System.Linq;
 
 namespace CMS.Backend.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        // 1. Khai báo biến _context thay cho _logger
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        // 2. Tiêm ApplicationDbContext vào constructor
+        public HomeController(ApplicationDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
+        // 3. Sửa lại hàm Index để lấy 3 bài viết mới nhất
         public IActionResult Index()
         {
-            return View();
+            // LINQ: Lấy 3 bài viết mới nhất kèm danh mục
+            var latestPosts = _context.Posts
+                              .Include(p => p.Category)
+                              .OrderByDescending(p => p.CreatedDate)
+                              .Take(3)
+                              .ToList();
+
+            // Truyền dữ liệu sang View
+            return View(latestPosts);
         }
+
+        // ========================================================
+        // CÁC HÀM MẶC ĐỊNH BÊN DƯỚI CỨ GIỮ NGUYÊN KHÔNG CẦN ĐỤNG TỚI
+        // ========================================================
 
         public IActionResult Privacy()
         {
