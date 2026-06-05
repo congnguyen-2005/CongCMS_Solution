@@ -1,0 +1,57 @@
+﻿@model CMS.data.Entities.Post
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Thêm bài viết mới";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">THÊM BÀI VIẾT MỚI</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tiêu đề bài viết:</label>
+                            <input asp-for="Title" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nội dung chi tiết:</label>
+                            <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Chuyên mục:</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryList" required>
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ảnh đại diện (Upload):</label>
+                            <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày đăng:</label>
+                            <input asp-for="CreatedDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <hr />
+                        <button type="submit" class="btn btn-success w-100 mb-2">Lưu bài viết</button>
+                        <a asp-action="Index" class="btn btn-secondary w-100">Quay lại</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#Content'))
+            .catch(error => { console.error(error); });
+    </script>
+}

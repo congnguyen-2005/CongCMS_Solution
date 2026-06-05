@@ -47,5 +47,15 @@ namespace CMS.Backend.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        // Bảng điều khiển dành cho Admin
+        public IActionResult Dashboard()
+        {
+            // Đếm số lượng dữ liệu trong Database
+            ViewBag.TotalPosts = _context.Posts.Count();
+            ViewBag.TotalUsers = _context.Users.Count();
+            ViewBag.TotalCategories = _context.Categories.Count();
+
+            return View();
+        }
     }
 }

@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Bảng điều khiển";
+}
+
+<h2 class="mb-4 text-primary fw-bold">TỔNG QUAN HỆ THỐNG</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3 shadow">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-file-earmark-post"></i> TỔNG BÀI VIẾT</h5>
+                <h1 class="display-4 fw-bold">@ViewBag.TotalPosts</h1>
+            </div>
+            <a href="/Post/Index" class="card-footer text-white text-decoration-none d-flex justify-content-between">
+                <span>Xem chi tiết</span> <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning mb-3 shadow">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-grid"></i> TỔNG DANH MỤC</h5>
+                <h1 class="display-4 fw-bold">@ViewBag.TotalCategories</h1>
+            </div>
+            <a href="/Category/Index" class="card-footer text-dark text-decoration-none d-flex justify-content-between border-dark">
+                <span>Xem chi tiết</span> <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3 shadow">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people"></i> TỔNG THÀNH VIÊN</h5>
+                <h1 class="display-4 fw-bold">@ViewBag.TotalUsers</h1>
+            </div>
+            <a href="/User/Index" class="card-footer text-white text-decoration-none d-flex justify-content-between">
+                <span>Xem chi tiết</span> <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+</div>
