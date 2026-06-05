@@ -1,0 +1,56 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập hệ thống - ThaiCMS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-dark text-white text-center py-4">
+                        <h4 class="mb-0 text-uppercase fw-bold">HỆ THỐNG QUẢN TRỊ CMS</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-action="Login" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên đăng nhập</label>
+                                <input type="text" name="username" class="form-control" placeholder="Nhập tài khoản..." required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mật khẩu</label>
+                                <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu..." required />
+                            </div>
+
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger py-2 small text-center">@ViewBag.Error</div>
+                            }
+
+                            <button type="submit" class="btn btn-primary w-100 py-2 mt-3 fw-bold">ĐĂNG NHẬP</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
