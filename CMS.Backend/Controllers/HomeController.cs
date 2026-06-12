@@ -1,59 +1,75 @@
 ﻿using System.Diagnostics;
 using CMS.Backend.Models;
 using Microsoft.AspNetCore.Mvc;
-// THÊM 3 DÒNG USING NÀY VÀO
 using Microsoft.EntityFrameworkCore;
 using CMS.data;
 using System.Linq;
 
 namespace CMS.Backend.Controllers
 {
+    // 🌟 ĐÃ ĐỒNG BỘ: Đưa Home vào đúng nhóm và cấu trúc tuyến đường phẳng giống Post/Product
+    [ApiExplorerSettings(IgnoreApi = false, GroupName = "GiaoDienAdmin")]
+    [Route("[controller]/[action]")]
     public class HomeController : Controller
     {
-        // 1. Khai báo biến _context thay cho _logger
         private readonly ApplicationDbContext _context;
 
-        // 2. Tiêm ApplicationDbContext vào constructor
         public HomeController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // 3. Sửa lại hàm Index để lấy 3 bài viết mới nhất
+        // ========================================================
+        // 1. TRANG CHỦ NGƯỜI DÙNG (Chấp nhận cả link gốc "/" và "/Home/Index")
+        // ========================================================
+        [HttpGet("~/")]
+        [HttpGet]
         public IActionResult Index()
         {
-            // LINQ: Lấy 3 bài viết mới nhất kèm danh mục
-            var latestPosts = _context.Posts
+            var viewModel = new HomeViewModel
+            {
+                LatestPosts = _context.Posts
                               .Include(p => p.Category)
                               .OrderByDescending(p => p.CreatedDate)
                               .Take(3)
-                              .ToList();
+                              .ToList(),
 
-            // Truyền dữ liệu sang View
-            return View(latestPosts);
+                FeaturedProducts = _context.Products
+                                  .Include(p => p.CategoryProduct)
+                                  .OrderByDescending(p => p.Id)
+                                  .Take(6)
+                                  .ToList()
+            };
+
+            return View(viewModel);
         }
 
         // ========================================================
-        // CÁC HÀM MẶC ĐỊNH BÊN DƯỚI CỨ GIỮ NGUYÊN KHÔNG CẦN ĐỤNG TỚI
+        // 2. CÁC TRANG MẶC ĐỊNH HỆ THỐNG
         // ========================================================
-
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        // Bảng điều khiển dành cho Admin
+
+        // ========================================================
+        // 3. BẢNG ĐIỀU KHIỂN ADMIN (URL chuẩn: /Home/Dashboard)
+        // ========================================================
+        [HttpGet]
         public IActionResult Dashboard()
         {
-            // Đếm số lượng dữ liệu trong Database
             ViewBag.TotalPosts = _context.Posts.Count();
             ViewBag.TotalUsers = _context.Users.Count();
             ViewBag.TotalCategories = _context.Categories.Count();
+            ViewBag.TotalProducts = _context.Products.Count();
 
             return View();
         }

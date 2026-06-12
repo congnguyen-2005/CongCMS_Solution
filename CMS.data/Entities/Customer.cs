@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; // Thêm dòng này
 
 namespace CMS.data.Entities
 {
     public class Customer
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Cấu hình tự tăng
         public int Id { get; set; }
 
         [Required]
@@ -25,8 +24,6 @@ namespace CMS.data.Entities
         [Required]
         public string Password { get; set; }
 
-        public virtual ICollection<Order> Orders { get; set; }
-
-
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

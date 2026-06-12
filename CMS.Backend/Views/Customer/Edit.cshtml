@@ -1,0 +1,39 @@
+﻿@model CMS.data.Entities.Customer
+@{
+    Layout = "_LayoutAdmin"; ViewData["Title"] = "Sửa khách hàng";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning"><h5>SỬA KHÁCH HÀNG</h5></div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Họ và Tên:</label>
+                        <input asp-for="Fullname" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Số điện thoại:</label>
+                        <input asp-for="Phone" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Email:</label>
+                        <input asp-for="Email" type="email" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Địa chỉ:</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Mật khẩu (Để trống nếu không đổi):</label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+            </form>
+        </div>
+    </div>
+</div>

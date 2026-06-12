@@ -1,0 +1,237 @@
+﻿@model CMS.data.Entities.Product
+@{
+    ViewData["Title"] = Model.Name + " - Chi tiết sản phẩm";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body {
+        background-color: #fcfcfc;
+        font-family: 'Montserrat', sans-serif;
+        color: #2b2b2b;
+    }
+
+    .product-detail-container {
+        margin-top: 60px;
+        margin-bottom: 60px;
+    }
+
+    .product-img-holder {
+        border: 1px solid #eee;
+        overflow: hidden;
+        background: #fff;
+        border-radius: 4px;
+    }
+
+    .product-meta-category {
+        color: #c5a880;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 600;
+    }
+
+    .product-meta-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #111;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+
+    .product-meta-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #111;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+    }
+
+    .product-description {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: #6c757d;
+        font-weight: 300;
+        margin-bottom: 30px;
+    }
+
+    .stock-badge {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .action-btn-group {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .btn-luxury-buy {
+        background-color: #111;
+        color: #fff;
+        border: 1px solid #111;
+        padding: 14px 40px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 500;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-align: center;
+        text-decoration: none;
+    }
+
+        .btn-luxury-buy:hover {
+            background-color: transparent;
+            color: #111;
+        }
+
+    .btn-luxury-back {
+        background-color: transparent;
+        color: #111;
+        border: 1px solid #111;
+        padding: 14px 25px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+        .btn-luxury-back:hover {
+            background-color: #111;
+            color: #fff;
+        }
+
+    .section-divider-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        position: relative;
+        padding-bottom: 15px;
+        margin-bottom: 40px;
+        text-transform: uppercase;
+    }
+
+        .section-divider-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #c5a880;
+        }
+
+    .related-card {
+        transition: all 0.4s ease;
+        border: 1px solid #eee !important;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+        text-decoration: none;
+    }
+
+        .related-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+        }
+</style>
+
+<div class="container product-detail-container">
+    <div class="row g-5">
+        <div class="col-md-6">
+            <div class="product-img-holder p-2">
+                <img src="@Model.ImageUrl" class="img-fluid w-100" alt="@Model.Name" style="max-height: 550px; object-fit: cover;">
+            </div>
+        </div>
+
+        <div class="col-md-6 d-flex flex-column justify-content-start">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-3" style="font-size:0.8rem; letter-spacing:1px;">
+                    <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/Product/Index" class="text-muted text-decoration-none">Cửa hàng</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Chi tiết</li>
+                </ol>
+            </nav>
+
+            <span class="product-meta-category">@Model.CategoryProduct?.Name</span>
+            <h1 class="product-meta-title">@Model.Name</h1>
+
+            <div class="product-meta-price">
+                @Model.Price.ToString("N0") <span style="font-size:1.1rem; font-family:'Montserrat'; font-weight:400;">đ</span>
+            </div>
+
+            <div>
+                @if (Model.StockQuantity > 0)
+                {
+                    <span class="badge bg-light text-success border border-success stock-badge"><i class="bi bi-check-circle-fill me-1"></i> Còn lại @Model.StockQuantity sản phẩm</span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-danger border border-danger stock-badge"><i class="bi bi-x-circle-fill me-1"></i> Tạm hết hàng</span>
+                }
+            </div>
+
+            <div class="product-description">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    @Html.Raw(Model.Description)
+                }
+                else
+                {
+                    <p class="font-italic">Sản phẩm thuộc bộ sưu tập giới hạn độc quyền cao cấp, được chế tác tỉ mỉ từ những nguyên liệu chọn lọc thượng hạng nhất.</p>
+                }
+            </div>
+
+            <div class="action-btn-group">
+                @if (Model.StockQuantity > 0)
+                {
+                    <a href="#" class="btn-luxury-buy"><i class="bi bi-bag-plus me-2"></i> Thêm vào giỏ hàng</a>
+                }
+                else
+                {
+                    <button class="btn-luxury-buy bg-secondary border-secondary text-white" disabled><i class="bi bi-telephone me-2"></i> Liên hệ đặt trước</button>
+                }
+                <a href="/Product/Index" class="btn-luxury-back"><i class="bi bi-arrow-left"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5">
+        <div class="col-12">
+            <h3 class="section-divider-title">Sản phẩm cùng phân khúc</h3>
+        </div>
+
+        @if (ViewBag.RelatedProducts != null && ((List<CMS.data.Entities.Product>)ViewBag.RelatedProducts).Any())
+        {
+            foreach (var relProd in (List<CMS.data.Entities.Product>)ViewBag.RelatedProducts)
+            {
+                <div class="col-6 col-md-4 mb-4">
+                    <a href="/Product/Details/@relProd.Id" class="card h-100 border-0 related-card p-3 text-center text-decoration-none text-dark">
+                        <img src="@relProd.ImageUrl" class="img-fluid mb-3" style="height: 220px; object-fit: cover;" alt="@relProd.Name">
+                        <h6 class="font-weight-bold mb-2" style="font-family:'Playfair Display'; font-size:1.05rem;">@relProd.Name</h6>
+                        <span style="color:#c5a880; font-size:0.9rem; font-family:'Playfair Display'; font-weight:600;">@relProd.Price.ToString("N0") đ</span>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-muted font-italic">Không có sản phẩm liên quan nào khác trong mục này.</div>
+        }
+    </div>
+</div>

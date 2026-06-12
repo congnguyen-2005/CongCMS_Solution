@@ -1,0 +1,24 @@
+﻿@model CMS.data.Entities.Order
+@{
+    Layout = "_LayoutAdmin"; ViewData["Title"] = "Cập nhật Đơn hàng";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark"><h5 class="mb-0">CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG #@Model.Id</h5></div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CustomerId" />
+                <input type="hidden" asp-for="OrderDate" />
+
+                <div class="row">
+                   
+                </div>
+                <hr />
+                <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </form>
+        </div>
+    </div>
+</div>

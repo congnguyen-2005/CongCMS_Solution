@@ -1,0 +1,43 @@
+﻿@model IEnumerable<CMS.data.Entities.Customer>
+@{
+    Layout = "_LayoutAdmin"; ViewData["Title"] = "Quản lý Khách hàng";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark fw-bold">DANH SÁCH KHÁCH HÀNG</h4>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Thêm khách hàng</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Họ và Tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Địa chỉ</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td class="fw-bold text-primary">@item.Fullname</td>
+                        <td>@item.Phone</td>
+
+                        <td>@item.Email</td>
+                        <td>@item.Address</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil-square"></i> Sửa</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Chắc chắn xóa khách hàng này?')"><i class="bi bi-trash"></i> Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

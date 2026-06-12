@@ -36,7 +36,7 @@ namespace CMS.Backend.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("FullName", user.Fullname)
+                    new Claim("Fullname", user.Fullname)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

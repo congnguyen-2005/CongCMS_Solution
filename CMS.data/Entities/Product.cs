@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace CMS.data.Entities
 {
     public class Product
     {
         [Key]
         public int Id { get; set; }
+
         [Required(ErrorMessage = "Ten san pham khong duoc de trong")]
         public string Name { get; set; }
         public string? Description { get; set; }
@@ -26,8 +28,6 @@ namespace CMS.data.Entities
         [ForeignKey("CategoryProductId")]
         public virtual CategoryProduct? CategoryProduct { get; set; }
 
-
-
-
+        // ĐÃ XÓA DÒNG public object Category ĐỂ TRÁNH LỖI BIÊN DỊCH
     }
 }

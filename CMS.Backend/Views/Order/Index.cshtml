@@ -1,0 +1,56 @@
+﻿@model IEnumerable<CMS.data.Entities.Order>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý Đơn hàng";
+}
+
+<div class="container mt-4">
+    <h4 class="text-dark fw-bold mb-3">QUẢN LÝ ĐƠN HÀNG</h4>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã Đơn</th>
+                    <th>Ngày đặt</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">#@item.Id</td>
+                        <td>@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><span class="text-primary fw-bold">@item.Customer?.Fullname</span></td>
+
+                        <td class="text-danger fw-bold">@string.Format("{0:#,##0} VNĐ", item.TotalAmount)</td>
+
+                        <td>
+                            @if (item.Status == "0" || item.Status == "Chờ xử lý")
+                            {
+                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                            }
+                            else if (item.Status == "1" || item.Status == "Đang giao")
+                            {
+                                <span class="badge bg-info">Đang giao</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Hoàn thành</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a href="/OrderDetail/Index/@item.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Chi tiết</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil-square"></i> Cập nhật</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cảnh báo: Xóa đơn hàng sẽ mất dữ liệu?')"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
