@@ -4,13 +4,16 @@ using CMS.data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using System; // Bắt buộc thêm để dùng hàm Math.Min
 
 namespace CMS.Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiExplorerSettings(IgnoreApi = false, GroupName = "HeThongAPI")]
+
+    // 🔐 KHÓA TỔNG: Bật bảo vệ toàn bộ Controller. Ai không có vé (Token/Cookie) sẽ bị đuổi ra!
     [Authorize]
-    [ApiExplorerSettings(IgnoreApi = false, GroupName = "HeThongAPI")] // Gom đúng vào cụm API hệ thống trên Swagger
     public class PostsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -21,10 +24,11 @@ namespace CMS.Backend.Controllers
         }
 
         // ========================================================
-        // 1. LẤY TOÀN BỘ BÀI VIẾT (Hiển thị dạng danh bạ rút gọn)
-        // URL: GET /api/Posts
+        // 1. LẤY TOÀN BỘ BÀI VIẾT (Hiển thị ngoài trang chủ)
         // ========================================================
         [HttpGet]
+        // 🟢 THẺ MIỄN TRỪ: Mở cửa riêng cho hàm này để khách vãng lai (ReactJS) có thể xem
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var posts = await _context.Posts
@@ -35,7 +39,10 @@ namespace CMS.Backend.Controllers
                     p.Title,
                     p.ImageUrl,
                     p.CreatedDate,
-                    CategoryName = p.Category != null ? p.Category.Name : "Chưa phân loại"
+                    CategoryName = p.Category != null ? p.Category.Name : "Chưa phân loại",
+                    ShortDescription = string.IsNullOrEmpty(p.Content)
+                                       ? ""
+                                       : p.Content.Substring(0, Math.Min(p.Content.Length, 120)) + "..."
                 })
                 .ToListAsync();
 
@@ -43,10 +50,10 @@ namespace CMS.Backend.Controllers
         }
 
         // ========================================================
-        // 2. LẤY BÀI VIẾT THEO CHUYÊN MỤC TIN TỨC
-        // URL: GET /api/Posts/category/5
+        // 2. LẤY BÀI VIẾT THEO CHUYÊN MỤC
         // ========================================================
         [HttpGet("category/{categoryId}")]
+        [AllowAnonymous] // 🟢 THẺ MIỄN TRỪ
         public async Task<IActionResult> GetByCategory(int categoryId)
         {
             var posts = await _context.Posts
@@ -57,7 +64,10 @@ namespace CMS.Backend.Controllers
                     p.Title,
                     p.ImageUrl,
                     p.CreatedDate,
-                    CategoryName = p.Category != null ? p.Category.Name : "Chưa phân loại"
+                    CategoryName = p.Category != null ? p.Category.Name : "Chưa phân loại",
+                    ShortDescription = string.IsNullOrEmpty(p.Content)
+                                       ? ""
+                                       : p.Content.Substring(0, Math.Min(p.Content.Length, 120)) + "..."
                 })
                 .ToListAsync();
 
@@ -65,21 +75,19 @@ namespace CMS.Backend.Controllers
         }
 
         // ========================================================
-        // 3. LẤY CHI TIẾT 1 BÀI VIẾT (Đã sửa: Chống lỗi vòng lặp Object Cycle)
-        // URL: GET /api/Posts/5
+        // 3. LẤY CHI TIẾT 1 BÀI VIẾT
         // ========================================================
         [HttpGet("{id}")]
+        [AllowAnonymous] // 🟢 THẺ MIỄN TRỪ
         public async Task<IActionResult> GetDetail(int id)
         {
-            // ĐỐI SÁCH: Sử dụng .Select() để phẳng hóa dữ liệu, bốc tách riêng trường Content 
-            // giúp ngăn chặn việc sinh vòng lặp vô hạn gây sập ứng dụng ReactJS/Mobile
             var post = await _context.Posts
                 .Include(p => p.Category)
                 .Where(p => p.Id == id)
                 .Select(p => new {
                     p.Id,
                     p.Title,
-                    p.Content, // Lấy đầy đủ nội dung chi tiết bài viết
+                    p.Content,
                     p.ImageUrl,
                     p.CreatedDate,
                     p.CategoryId,
@@ -94,5 +102,8 @@ namespace CMS.Backend.Controllers
 
             return Ok(post);
         }
+
+        // ⚠️ NẾU SAU NÀY BẠN VIẾT THÊM HÀM [HttpPost] TẠO BÀI VIẾT Ở ĐÂY:
+        // Bạn không ghi [AllowAnonymous], hàm đó sẽ tự động được bảo vệ bởi khóa tổng [Authorize] ở trên cùng. Vô cùng an toàn!
     }
 }

@@ -10,7 +10,7 @@ namespace CMS.Backend.Controllers
     [ApiExplorerSettings(IgnoreApi = false, GroupName = "GiaoDienAdmin")]
     [Route("api/[controller]")]
     [ApiController]
-    // 🌟 ĐÃ GỠ BỎ [Authorize]: Mở khóa hoàn toàn API này để ReactJS lấy dữ liệu công khai
+    [Authorize]
     public class CategoriesProductsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -25,6 +25,7 @@ namespace CMS.Backend.Controllers
         // URL: GET /api/CategoriesProducts
         // ========================================================
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -55,6 +56,7 @@ namespace CMS.Backend.Controllers
         // URL: GET /api/CategoriesProducts/5
         // ========================================================
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDetail(int id)
         {
             try
