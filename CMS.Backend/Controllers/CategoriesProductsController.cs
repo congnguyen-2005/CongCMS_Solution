@@ -7,11 +7,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Backend.Controllers
 {
-    // ĐÃ SỬA 1: Gom đúng vào cụm API hệ thống "HeThongAPI" trên Swagger để đồng bộ với Posts API
     [ApiExplorerSettings(IgnoreApi = false, GroupName = "GiaoDienAdmin")]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Bảo vệ API bằng cơ chế xác thực hệ thống
+    // 🌟 ĐÃ GỠ BỎ [Authorize]: Mở khóa hoàn toàn API này để ReactJS lấy dữ liệu công khai
     public class CategoriesProductsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -52,7 +51,7 @@ namespace CMS.Backend.Controllers
         }
 
         // ========================================================
-        // 🌟 HÀM MỚI 2: LẤY CHI TIẾT 1 DANH MỤC SẢN PHẨM THEO ID
+        // 2. LẤY CHI TIẾT 1 DANH MỤC SẢN PHẨM THEO ID
         // URL: GET /api/CategoriesProducts/5
         // ========================================================
         [HttpGet("{id}")]

@@ -93,7 +93,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger"; // Đường dẫn truy cập trang test: https://localhost:xxxx/swagger
 });
 
-// --- 🌟 ĐÃ FIX: SẮP XẾP LẠI THỨ TỰ PIPELINE CHUẨN ĐỂ KHÔNG BỊ LẶP LINK ---
+// --- SẮP XẾP LẠI THỨ TỰ PIPELINE CHUẨN ĐỂ KHÔNG BỊ LẶP LINK ---
 app.UseRouting();
 
 // 1. Kích hoạt CORS (Dùng đúng tên "AllowReactApp" đã đăng ký ở trên)
@@ -112,7 +112,7 @@ app.UseAuthorization();
 // Phân luồng A: Ánh xạ cấu trúc cho các Web API (Các hàm xử lý dữ liệu thô JSON)
 app.MapControllers();
 
-// Phân luồng B: Ánh xạ đường dẫn cho giao diện Web MVC truyền thống (.cshtml)
+// Phân luồng B: Ánh xạ đường dẫn cho giao diện Web MVC truyền thức (.cshtml)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
