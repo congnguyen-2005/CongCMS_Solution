@@ -1,15 +1,16 @@
-﻿import React, { useState, useContext } from 'react';
+﻿import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
-import axiosClient from '../api/axiosClient'; // Đảm bảo bạn đã cấu hình file này
+import { AuthContext } from '../contexts/AuthContext'; // 🌟 Import thêm AuthContext
+import axiosClient from '../api/axiosClient';
 
 const CheckoutPage = () => {
     const { cartItems, cartTotal, clearCart } = useContext(CartContext);
+    const { user } = useContext(AuthContext); // Lấy thông tin user đăng nhập
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
-    // State lưu thông tin khách hàng
     const [formData, setFormData] = useState({
         customerName: '',
         phone: '',
@@ -17,54 +18,62 @@ const CheckoutPage = () => {
         note: ''
     });
 
+    // 🌟 AUTO-FILL: Nếu User đã đăng nhập, tự điền tên và SĐT
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                customerName: user.name || user.fullName || '',
+                phone: user.phone || '',
+                address: user.address || ''
+            }));
+        }
+    }, [user]);
+
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // HÀM XỬ LÝ KHI BẤM XÁC NHẬN ĐẶT HÀNG
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setErrorMsg('');
 
         try {
-            // 1. Chuẩn bị dữ liệu theo đúng DTO của Backend
+            // 🌟 CHUẨN HÓA DỮ LIỆU ĐỂ BẮN XUỐNG C# OrdersController
             const payload = {
-                // Gộp thông tin lại thành 1 chuỗi Notes vì Backend hiện tại chỉ nhận Notes
+                customerId: user?.id || 13, // Nếu ko có user ID thì gán 13 như SQL của bạn
                 notes: `[Tên: ${formData.customerName}] [SĐT: ${formData.phone}] [Địa chỉ: ${formData.address}] [Ghi chú: ${formData.note}]`,
-                items: cartItems.map(item => ({
+                orderDetails: cartItems.map(item => ({
                     productId: item.id,
                     quantity: item.quantity,
                     unitPrice: item.price
                 }))
             };
 
-            // 2. Gọi API POST xuống Backend
-            const response = await axiosClient.post('/Checkout/PlaceOrder', payload);
+            // Gọi API chốt đơn (Sửa đường dẫn thành /Orders cho khớp với C# API)
+            const response = await axiosClient.post('/Orders', payload);
 
-            // 3. Xử lý khi thành công
-            alert(response.message || "Đặt hàng thành công!");
-            clearCart(); // Dọn dẹp giỏ hàng
-            navigate('/'); // Tạm thời chuyển về trang chủ (hoặc trang Success)
+            alert(response.data?.message || response.message || "🎉 Đặt hàng thành công! Hệ thống đã trừ kho tự động.");
+            clearCart();
+            navigate('/my-orders'); // Chuyển sang lịch sử mua hàng
 
         } catch (error) {
             console.error("Lỗi đặt hàng:", error);
 
-            // 🌟 LÔI LỖI CHI TIẾT TỪ BACKEND RA MÀN HÌNH
-            const serverError = error.response?.data?.error;
-            const serverMsg = error.response?.data?.message;
-
-            setErrorMsg(`Lỗi Server: ${serverError || serverMsg || "Không rõ nguyên nhân, hãy xem F12"}`);
+            // 🌟 CHỐT CHẶN: BẮT LỖI TỒN KHO TỪ BACKEND C# (Status 400)
+            if (error.response && error.response.status === 400) {
+                const serverMsg = error.response.data?.message;
+                setErrorMsg(`⛔ Thất bại: ${serverMsg}`);
+            } else {
+                setErrorMsg("⛔ Lỗi Server: Không thể xử lý giao dịch lúc này. Hãy F12 kiểm tra Console.");
+            }
         } finally {
-            setIsLoading(false); // Tắt trạng thái đang load
-        } // 🌟 ĐÓNG NGOẶC CỦA KHỐI FINALLY TẠI ĐÂY
-    }; // 🌟 RỒI MỚI ĐÓNG NGOẶC CỦA HÀM handlePlaceOrder TẠI ĐÂY
-
-    // Tránh việc khách gõ URL /checkout khi giỏ trống
-    if (cartItems.length === 0) {
+            setIsLoading(false);
+        }
     };
 
-    // Tránh việc khách gõ URL /checkout khi giỏ trống
+    // Đã xóa cú pháp lặp lỗi ở đây
     if (cartItems.length === 0) {
         return (
             <div className="container mt-5 pt-5 text-center">
@@ -85,7 +94,6 @@ const CheckoutPage = () => {
             )}
 
             <div className="row">
-                {/* CỘT TRÁI: FORM NHẬP THÔNG TIN */}
                 <div className="col-lg-7 mb-4">
                     <div className="glass-card p-4">
                         <h5 className="font-weight-bold text-neon border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
@@ -119,13 +127,11 @@ const CheckoutPage = () => {
                     </div>
                 </div>
 
-                {/* CỘT PHẢI: TÓM TẮT ĐƠN HÀNG */}
                 <div className="col-lg-5">
                     <div className="glass-card p-4 sticky-top" style={{ top: '100px' }}>
                         <h5 className="font-weight-bold text-white border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
                             Tóm Tắt Đơn Hàng
                         </h5>
-
                         <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="mb-4 pr-2 custom-scrollbar">
                             {cartItems.map(item => (
                                 <div key={item.id} className="d-flex justify-content-between mb-3 align-items-center">
@@ -148,7 +154,6 @@ const CheckoutPage = () => {
                             <span>Phí giao hàng:</span>
                             <span className="text-success">Miễn phí</span>
                         </div>
-
                         <div className="d-flex justify-content-between mb-4">
                             <span className="h5 text-white">Tổng thanh toán:</span>
                             <span className="h4 font-weight-bold text-neon">

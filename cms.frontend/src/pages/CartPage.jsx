@@ -1,7 +1,6 @@
 ﻿import React, { useContext } from 'react';
-
 import { CartContext } from '../contexts/CartContext';
-import { Link, useNavigate } from 'react-router-dom'; // Thêm useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 
 const CartPage = () => {
     const { cartItems, removeFromCart, updateQuantity, cartTotal } = useContext(CartContext);
@@ -9,17 +8,17 @@ const CartPage = () => {
 
     const BACKEND_URL = "https://localhost:7089";
     const defaultImage = "https://dummyimage.com/150x150/18181b/00f0ff.png&text=Camera";
-    
+
     const handleProceedToCheckout = () => {
         const storedUser = localStorage.getItem('user') || localStorage.getItem('customer');
         if (!storedUser) {
             alert("Vui lòng Đăng nhập hoặc Đăng ký tài khoản để tiến hành đặt hàng nhé!");
-            // 🌟 Mẹo hay: Truyền thêm chữ "?redirect=/checkout" để báo cho trang Login biết phải quay lại đâu
             navigate('/login?redirect=/checkout');
         } else {
             navigate('/checkout');
         }
     };
+
     if (cartItems.length === 0) {
         return (
             <div className="container mt-5 pt-5 mb-5 text-center h-100">
@@ -58,6 +57,9 @@ const CartPage = () => {
                                         ? item.imageUrl
                                         : (item.imageUrl ? `${BACKEND_URL}${item.imageUrl}` : defaultImage);
 
+                                    // Lấy số tồn kho từ CSDL (nếu không có tạm gán là 999 để test)
+                                    const maxStock = item.stockQuantity || item.stock || 999;
+
                                     return (
                                         <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <td className="p-4 d-flex align-items-center">
@@ -74,7 +76,16 @@ const CartPage = () => {
                                                 <div className="d-flex justify-content-center align-items-center">
                                                     <button className="btn btn-sm btn-dark" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
                                                     <span className="mx-3 font-weight-bold">{item.quantity}</span>
-                                                    <button className="btn btn-sm btn-dark" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+
+                                                    {/* 🌟 CHỐT CHẶN: KHÔNG THỂ BẤM VƯỢT QUÁ TỒN KHO */}
+                                                    <button className="btn btn-sm btn-dark" onClick={() => {
+                                                        if (item.quantity >= maxStock) {
+                                                            alert(`⛔ Sản phẩm này chỉ còn tối đa ${maxStock} chiếc trong kho!`);
+                                                        } else {
+                                                            updateQuantity(item.id, item.quantity + 1);
+                                                        }
+                                                    }}>+</button>
+
                                                 </div>
                                             </td>
                                             <td className="text-right pr-4 font-weight-bold text-neon" style={{ fontSize: '1.1rem' }}>
@@ -99,7 +110,6 @@ const CartPage = () => {
                         <h5 className="font-weight-bold text-white mb-4 border-bottom pb-3" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
                             TỔNG QUAN ĐƠN HÀNG
                         </h5>
-
                         <div className="d-flex justify-content-between mb-3 text-muted">
                             <span>Tạm tính ({cartItems.length} sản phẩm):</span>
                             <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)}</span>
@@ -108,14 +118,12 @@ const CartPage = () => {
                             <span>Phí vận chuyển:</span>
                             <span>Đang cập nhật</span>
                         </div>
-
                         <div className="d-flex justify-content-between mb-4">
                             <span className="h5 text-white">Tổng cộng:</span>
                             <span className="h4 font-weight-bold text-neon">
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)}
                             </span>
                         </div>
-
                         <button
                             onClick={handleProceedToCheckout}
                             className="btn btn-primary btn-block py-2 font-weight-bold"
