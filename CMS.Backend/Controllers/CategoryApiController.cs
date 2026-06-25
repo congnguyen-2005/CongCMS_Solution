@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CMS.Backend.Controllers
 {
-    [Route("api/[controller]")] // Đường dẫn: api/CategoryApi
+    [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize] // Khóa tổng
     [ApiExplorerSettings(IgnoreApi = false, GroupName = "HeThongAPI")]
     public class CategoryApiController : ControllerBase
     {
@@ -20,16 +20,16 @@ namespace CMS.Backend.Controllers
             _context = context;
         }
 
-        // GET: api/CategoryApi
         [HttpGet]
+        [AllowAnonymous] // 🌟 CẤP QUYỀN: Mở khóa để React (ShopPage) gọi được API này không cần đăng nhập
         public async Task<IActionResult> GetAll()
         {
             var categories = await _context.Categories.ToListAsync();
             return Ok(categories);
         }
 
-        // GET: api/CategoryApi/5
         [HttpGet("{id}")]
+        [AllowAnonymous] // 🌟 CẤP QUYỀN
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _context.Categories.FindAsync(id);
@@ -37,7 +37,6 @@ namespace CMS.Backend.Controllers
             return Ok(category);
         }
 
-        // POST: api/CategoryApi
         [HttpPost]
         public async Task<IActionResult> Create(Category model)
         {
@@ -46,7 +45,6 @@ namespace CMS.Backend.Controllers
             return Ok(model);
         }
 
-        // PUT: api/CategoryApi/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, Category model)
         {
@@ -57,7 +55,6 @@ namespace CMS.Backend.Controllers
             return Ok(model);
         }
 
-        // DELETE: api/CategoryApi/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -30,13 +30,18 @@
                         <td class="text-danger fw-bold">@string.Format("{0:#,##0} VNĐ", item.TotalAmount)</td>
 
                         <td>
-                            @if (item.Status == "0" || item.Status == "Chờ xử lý")
+                            @* 🌟 ĐÃ SỬA: So sánh số nguyên trực tiếp, đồng thời map với quy trình Kho *@
+                            @if (item.Status == 0)
                             {
-                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                <span class="badge bg-warning text-dark">Chờ xử lý (Tạm giữ)</span>
                             }
-                            else if (item.Status == "1" || item.Status == "Đang giao")
+                            else if (item.Status == 1)
                             {
-                                <span class="badge bg-info">Đang giao</span>
+                                <span class="badge bg-info">Đang giao (Trừ kho)</span>
+                            }
+                            else if (item.Status == 2)
+                            {
+                                <span class="badge bg-danger">Đã hủy (Hoàn tồn)</span>
                             }
                             else
                             {

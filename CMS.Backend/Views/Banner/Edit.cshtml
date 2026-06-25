@@ -1,0 +1,84 @@
+﻿@model CMS.data.Entities.Banner
+
+@{
+    Layout = "_LayoutAdmin";
+
+    ViewData["Title"] = "Sửa Banner";
+}
+
+<div class="mb-4">
+    <h2 class="font-weight-bold text-dark">Chỉnh Sửa Banner</h2>
+</div>
+
+<div class="card shadow-sm border-0 col-md-8 mx-auto">
+    <div class="card-body p-4">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group text-center mb-4 p-3 bg-light rounded border">
+                <p class="text-muted small font-weight-bold mb-2">HÌNH ẢNH HIỆN TẠI</p>
+                <img src="@Model.ImageUrl" alt="Current Banner" style="max-height: 150px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);" />
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="font-weight-bold text-primary">Thay đổi hình ảnh mới (Bỏ trống nếu muốn giữ ảnh cũ)</label>
+                <div class="custom-file">
+                    <input type="file" name="uploadImage" class="custom-file-input" id="customFile" accept="image/*">
+                    <label class="custom-file-label" for="customFile">Chọn file ảnh mới...</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Title" class="font-weight-bold">Tiêu đề (Câu Slogan) <span class="text-danger">*</span></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="TargetUrl" class="font-weight-bold">Link khi click vào ảnh</label>
+                    <input asp-for="TargetUrl" class="form-control" />
+                    <span asp-validation-for="TargetUrl" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="DisplayOrder" class="font-weight-bold">Thứ tự hiển thị</label>
+                    <input asp-for="DisplayOrder" class="form-control" type="number" />
+                    <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="form-group form-check mt-2 mb-4">
+                <input class="form-check-input" asp-for="IsActive" />
+                <label class="form-check-label font-weight-bold cursor-pointer" asp-for="IsActive">
+                    Bật hiển thị trên trang chủ
+                </label>
+            </div>
+
+            <hr />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-light border">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fa-solid fa-check mr-1"></i> Cập Nhật Banner
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

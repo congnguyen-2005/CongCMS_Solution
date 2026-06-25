@@ -101,7 +101,7 @@ app.UseCors("AllowReactApp");
 
 // 2. Kiểm tra danh tính người dùng (Đọc Cookie) TRƯỚC
 app.UseAuthentication();
-
+app.UseStaticFiles();
 // 3. Kiểm tra quyền truy cập vào Controller SAU
 app.UseAuthorization();
 

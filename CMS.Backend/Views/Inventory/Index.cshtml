@@ -1,0 +1,110 @@
+﻿@model IEnumerable<CMS.data.Entities.Product>
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Giám Sát Tồn Kho";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="font-weight-bold text-dark">Kiểm Soát Tồn Kho Tổng</h2>
+        <p class="text-muted mb-0">Theo dõi trạng thái Khả dụng, Thực tế và Hạn mức an toàn (Safety Stock).</p>
+    </div>
+    <a asp-action="ExportExcel" class="btn btn-success shadow-sm font-weight-bold px-4">
+        <i class="fa-solid fa-file-excel mr-2"></i> Xuất File Excel
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-left-danger shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Cảnh báo hết hàng (Tồn = 0)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(p => p.StockQuantity == 0) thiết bị</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Sắp hết (Safety Stock &le; 2)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(p => p.StockQuantity > 0 && p.StockQuantity <= 2) thiết bị</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fa-solid fa-box-open fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="text-center" style="width: 80px;">Ảnh</th>
+                        <th>Thiết Bị / Mã SP</th>
+                        <th class="text-center">Đang Giữ <br /><small class="text-muted">(Đơn chưa giao)</small></th>
+                        <th class="text-center text-primary">Khả Dụng <br /><small class="text-muted">(Cho phép mua)</small></th>
+                        <th class="text-center font-weight-bold">Tồn Thực Tế <br /><small class="text-muted">(Trong kho)</small></th>
+                        <th class="text-center">Cảnh Báo Hàng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        // Giả lập logic Đang Giữ = 0 ở thời điểm hiện tại (sẽ cập nhật khi có bảng Order)
+                        int dangGiu = 0;
+                        int khaDung = item.StockQuantity - dangGiu;
+                        int thucTe = item.StockQuantity;
+
+                        <tr>
+                            <td class="text-center p-2">
+                                <img src="@item.ImageUrl" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                            </td>
+                            <td>
+                                <span class="font-weight-bold d-block">@item.Name</span>
+                                <small class="text-muted">Mã: #CAM-@item.Id | DM: @(item.CategoryProduct?.Name ?? "Trống")</small>
+                            </td>
+                            <td class="text-center text-warning font-weight-bold">
+                                @dangGiu
+                            </td>
+                            <td class="text-center text-primary font-weight-bold" style="font-size: 1.1rem;">
+                                @khaDung
+                            </td>
+                            <td class="text-center font-weight-bold" style="font-size: 1.1rem; background-color: rgba(0,0,0,0.02);">
+                                @thucTe
+                            </td>
+                            <td class="text-center">
+                                @if (thucTe == 0)
+                                {
+                                    <span class="badge badge-danger px-3 py-2"><i class="fa-solid fa-ban mr-1"></i> Hết hàng</span>
+                                }
+                                else if (thucTe <= 2)
+                                {
+                                    <span class="badge badge-warning px-3 py-2 text-dark"><i class="fa-solid fa-clock mr-1"></i> Sắp hết</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success px-3 py-2"><i class="fa-solid fa-check mr-1"></i> Còn hàng</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

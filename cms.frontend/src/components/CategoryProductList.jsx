@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+Ôªøimport React, { useState, useEffect } from 'react';
 import categoryProductService from '../services/categoryProductService';
 
 const CategoryProductList = () => {
@@ -10,65 +10,40 @@ const CategoryProductList = () => {
             try {
                 setLoading(true);
                 const data = await categoryProductService.getAllCategoryProducts();
-
-                // 1. IN RA ?? B?T T?N TAY C?U TR⁄C D? LI?U
-                console.log("D? li?u g?c t? API:", data);
-
-                // 2. X? L› PH“NG TH? CHO M?I TR??NG H?P C?A .NET CORE
-                if (Array.isArray(data)) {
-                    // Tr??ng h?p API chu?n: Tr? th?ng m?ng [...]
-                    setCategoryProducts(data);
-                }
-                else if (data && data.$values) {
-                    // Tr??ng h?p .NET Core ch?ng vÚng l?p: Tr? v? { $id, $values: [...] }
-                    setCategoryProducts(data.$values);
-                }
-                else if (data && data.data) {
-                    // Tr??ng h?p API t? b?c Wrapper: Tr? v? { success: true, data: [...] }
-                    setCategoryProducts(data.data);
-                }
-                else {
-                    // N?u t?t c? ??u sai, g·n m?ng r?ng ?? khÙng b? s?p trang
-                    console.warn("??nh d?ng d? li?u khÙng x·c ??nh!");
-                    setCategoryProducts([]);
-                }
-
+                if (Array.isArray(data)) setCategoryProducts(data);
+                else if (data && data.$values) setCategoryProducts(data.$values);
+                else if (data && data.data) setCategoryProducts(data.data);
+                else setCategoryProducts([]);
             } catch (error) {
-                console.error("L?i khi t?i danh m?c s?n ph?m:", error);
-                setCategoryProducts([]); // G·n m?ng r?ng n?u g?i API th?t b?i
+                setCategoryProducts([]);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchCategoryProducts();
     }, []);
 
-    if (loading) {
-        return <div className="text-center my-4">?ang t?i danh m?c s?n ph?m...</div>;
-    }
+    if (loading) return <div className="text-center my-4 text-neon">ƒêang qu√©t d·ªØ li·ªáu...</div>;
 
     return (
-        <div className="card shadow-sm border-0 rounded-lg">
-            <div className="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
-                <h5 className="card-title text-uppercase font-weight-bold text-dark d-flex align-items-center mb-0" style={{ letterSpacing: '0.5px', fontSize: '1.1rem' }}>
-                    <i className="fa-solid fa-cubes text-primary mr-2" style={{ fontSize: '1.3rem' }}></i> Danh m?c SP
-                </h5>
-            </div>
-            <div className="card-body p-0">
+        // ƒê√É ƒê·ªîI: D√πng glass-card
+        <div className="glass-card">
+           
+            <div className="card-body p-0 pb-3">
                 <div className="list-group list-group-flush">
                     {categoryProducts.length === 0 ? (
-                        <div className="p-4 text-center text-muted">KhÙng cÛ danh m?c n‡o.</div>
+                        <div className="p-4 text-center text-muted">H·ªá th·ªëng tr·ªëng.</div>
                     ) : (
                         categoryProducts.map((item) => (
                             <button
                                 key={item.id}
                                 type="button"
-                                className="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3 transition-all"
-                                style={{ fontSize: '0.95rem', color: '#495057' }}
+                                // ƒê√É ƒê·ªîI: D√πng glass-list-item
+                                className="list-group-item glass-list-item d-flex justify-content-between align-items-center px-4 py-3"
+                                style={{ fontSize: '0.95rem' }}
                             >
                                 <span className="font-weight-normal">{item.name}</span>
-                                <i className="fa-solid fa-chevron-right text-muted" style={{ fontSize: '0.8rem', opacity: 0.5 }}></i>
+                                <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.7rem', opacity: 0.5 }}></i>
                             </button>
                         ))
                     )}

@@ -1,0 +1,71 @@
+﻿@model CMS.data.Entities.Menu
+
+@{
+    Layout = "_LayoutAdmin";
+
+    ViewData["Title"] = "Chỉnh sửa Menu";
+}
+
+<div class="mb-4">
+    <h2 class="font-weight-bold text-dark">Chỉnh sửa Menu</h2>
+    <p class="text-muted">Cập nhật thông tin cho menu <strong class="text-info">@Model.Name</strong></p>
+</div>
+
+<div class="card shadow-sm border-0 col-md-8 mx-auto">
+    <div class="card-body p-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Name" class="font-weight-bold">Tên hiển thị <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="LinkUrl" class="font-weight-bold">Đường dẫn (URL)</label>
+                    <input asp-for="LinkUrl" class="form-control" />
+                    <span asp-validation-for="LinkUrl" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="ParentId" class="font-weight-bold">ID Menu Cha (Tùy chọn)</label>
+                    <input asp-for="ParentId" class="form-control" />
+                    <span asp-validation-for="ParentId" class="text-danger small"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="DisplayOrder" class="font-weight-bold">Thứ tự hiển thị</label>
+                    <input asp-for="DisplayOrder" class="form-control" type="number" />
+                    <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="form-group form-check mt-2 mb-4">
+                <input class="form-check-input" asp-for="IsActive" />
+                <label class="form-check-label font-weight-bold cursor-pointer" asp-for="IsActive">
+                    Hiển thị công khai trên Website
+                </label>
+            </div>
+
+            <hr />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-light border">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fa-solid fa-check mr-1"></i> Cập Nhật
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

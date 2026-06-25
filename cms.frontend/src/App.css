@@ -1,38 +1,379 @@
-.App {
-  text-align: center;
+﻿/* Tông màu Tương lai & Luxury: Đen sâu (Deep Black) kết hợp Xanh Neon và Trắng tương phản */
+:root {
+    --bg-dark: #09090b;
+    --bg-panel: #18181b;
+    --neon-cyan: #00f0ff;
+    --luxury-gold: #d4af37;
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+/* =========================================
+   MỞ RỘNG LAYOUT CHO MÀN HÌNH LỚN
+========================================= */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px !important; /* Mở rộng không gian nội dung lên 1320px */
+    }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1500px !important; /* Với màn hình cực rộng, bung lên 1500px */
+    }
+}
+/* Hiệu ứng kính mờ (Glassmorphism) cho Header */
+.glass-header {
+    background: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* Điểm nhấn chữ phát sáng (Neon Hover) */
+.nav-link-custom {
+    color: var(--text-main) !important;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-.App-link {
-  color: #61dafb;
+    .nav-link-custom:hover {
+        color: var(--neon-cyan) !important;
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Đường viền chạy dưới chân menu khi hover */
+    .nav-link-custom::after {
+        content: '';
+        position: absolute;
+        width: 0%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--neon-cyan);
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .nav-link-custom:hover::after {
+        width: 100%;
+    }
+
+/* Nút bấm Luxury Futuristic */
+.btn-cyber {
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 8px 20px;
+    border-radius: 0; /* Bo góc vuông tạo cảm giác mạnh mẽ tương lai */
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 0 rgba(0, 240, 255, 0);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    .btn-cyber:hover {
+        background: var(--neon-cyan);
+        color: #000;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+    }
+
+/* Biểu tượng Giỏ hàng nổi bật */
+.cart-icon-wrapper {
+    position: relative;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: color 0.3s ease;
+}
+
+    .cart-icon-wrapper:hover {
+        color: var(--neon-cyan);
+    }
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #ff2a2a;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 42, 42, 0.6);
+}
+
+/* Chân trang */
+.footer-dark {
+    background-color: var(--bg-panel);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+}
+/* =========================================
+   HIỆU ỨNG KÍNH MỜ (GLASSMORPHISM CARDS)
+========================================= */
+.glass-card {
+    background: rgba(24, 24, 27, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: var(--text-main);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 240, 255, 0.1);
+        border-color: rgba(0, 240, 255, 0.3);
+    }
+
+/* Custom cho danh sách (List Group) */
+.glass-list-item {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.3s ease;
+}
+
+    .glass-list-item:hover {
+        color: var(--neon-cyan) !important;
+        background: rgba(0, 240, 255, 0.05) !important;
+        padding-left: 2rem !important; /* Hiệu ứng lùi chữ vào trong rất sang trọng */
+    }
+
+/* Custom chữ phát sáng */
+.text-neon {
+    color: var(--neon-cyan) !important;
+}
+/* =========================================
+   HIỆU ỨNG ẢNH SẢN PHẨM (IMAGE HOVER)
+========================================= */
+.product-img-wrapper {
+    overflow: hidden; /* Giữ cho ảnh không bị tràn ra ngoài khi phóng to */
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.glass-product-img {
+    width: 100%;
+    height: 220px; /* Cố định chiều cao để các thẻ bằng nhau */
+    object-fit: cover; /* Cắt cúp ảnh gọn gàng không bị méo */
+    transition: transform 0.5s ease; /* Hiệu ứng chuyển động mượt 0.5 giây */
+}
+
+/* Khi rà chuột vào thẻ glass-card, ảnh bên trong sẽ từ từ to lên */
+.glass-card:hover .glass-product-img {
+    transform: scale(1.08);
+}
+/* =========================================
+   HIỆU ỨNG BANNER ĐIỆN ẢNH (CINEMATIC SLIDER)
+========================================= */
+.cinematic-banner {
+    position: relative;
+    height: 550px; /* Chiều cao cố định của Banner */
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+}
+
+.banner-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out; /* Hiệu ứng mờ dần (Fade) */
+    z-index: 1;
+}
+
+    .banner-slide.active {
+        opacity: 1;
+        z-index: 2;
+    }
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1); /* Ảnh ban đầu hơi to */
+    transition: transform 6s linear; /* Thu nhỏ từ từ trong 6 giây */
+}
+
+/* Khi Slide được kích hoạt, ảnh sẽ lùi ra xa tạo cảm giác không gian sâu */
+.banner-slide.active .banner-img {
+    transform: scale(1);
+}
+
+/* Lớp phủ Gradient đen nhám để chữ luôn đọc được */
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(9,9,11,0.95) 0%, rgba(9,9,11,0.6) 40%, transparent 100%);
+    display: flex;
+    align-items: center;
+    z-index: 3;
+}
+
+.banner-content {
+    padding-left: 8%;
+    max-width: 600px;
+}
+
+/* Dấu chấm chuyển slide (Indicators) */
+.banner-indicators {
+    position: absolute;
+    bottom: 30px;
+    left: 8%;
+    display: flex;
+    gap: 10px;
+    z-index: 4;
+}
+
+.indicator-dot {
+    width: 30px;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .indicator-dot.active {
+        background-color: var(--neon-cyan);
+        box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+/* =========================================
+   DROPDOWN ĐA CẤP KÍNH MỜ (GLASS DROPDOWN)
+========================================= */
+/* Khung bọc thực đơn để định vị */
+.nav-item-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hộp Dropdown ẩn danh mặc định */
+.glass-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(15px); /* Đẩy xuống một chút để tạo độ trễ chuyển động */
+    background: rgba(12, 12, 16, 0.92); /* Nền tối sâu */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    min-width: 220px;
+    border-radius: 4px;
+    padding: 10px 0;
+    /* Hiệu ứng ẩn mượt mà bằng CSS Animate thay vì ẩn lập tức */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.05);
+}
+
+/* Kích hoạt hiển thị khi rà chuột (Hover) vào Menu Cha */
+.nav-item-dropdown:hover .glass-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(5px); /* Trượt nhẹ lên trên rất tinh tế */
+}
+
+/* Các mục con bên trong Dropdown */
+.glass-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: left;
+    transition: all 0.25s ease;
+}
+
+    .glass-dropdown-item:hover {
+        background: rgba(0, 240, 255, 0.06); /* Phát sáng nhẹ nền */
+        color: var(--neon-cyan) !important; /* Chữ đổi màu Cyan */
+        padding-left: 30px; /* Chữ tự động lùi nhẹ sang phải tạo cảm giác phản hồi nhanh nhạy */
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    }
+
+/* Biểu tượng mũi tên nhỏ cạnh Menu Cha */
+.arrow-icon {
+    font-size: 0.7rem;
+    margin-left: 6px;
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.nav-item-dropdown:hover .arrow-icon {
+    transform: rotate(180deg); /* Mũi tên tự xoay ngược khi mở menu */
+    color: var(--neon-cyan);
+}
+
+/* =========================================
+   Ô TÌM KIẾM ĐIỆN ẢNH (CYBER SEARCH BAR)
+========================================= */
+.cyber-search-box {
+    background: rgba(18, 18, 20, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    padding: 12px 20px;
+    border-radius: 30px; /* Bo tròn hoàn toàn tạo cảm giác mượt mà */
+    width: 100%;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+    .cyber-search-box:focus {
+        outline: none;
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        background: rgba(18, 18, 20, 0.8);
+    }
+
+    .cyber-search-box::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+        font-style: italic;
+    }
+
+.search-wrapper {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neon-cyan);
+    opacity: 0.7;
 }

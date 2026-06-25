@@ -56,7 +56,15 @@ namespace CMS.Backend.Controllers
             {
                 model.Password = "123456";
             }
+            if (string.IsNullOrEmpty(model.Email))
+            {
+                model.Email = "chuaco@email.com"; // Gán tạm để SQL Server không báo lỗi NULL
+            }
 
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                model.Password = "123456";
+            }
             _context.Customers.Add(model);
             await _context.SaveChangesAsync();
 

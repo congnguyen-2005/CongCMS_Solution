@@ -1,107 +1,141 @@
-﻿using CMS.data;
-using CMS.data.Entities;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CMS.data;
+using CMS.data.Entities;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Backend.Controllers
 {
-    [Authorize]
-    [ApiExplorerSettings(IgnoreApi = false, GroupName = "GiaoDienAdmin")]
-    [Route("[controller]/[action]")]
-    public class OrderController : Controller
+    [Route("api/[controller]")] // Đường dẫn sẽ là: api/Orders
+    [ApiController]
+    [ApiExplorerSettings(IgnoreApi = false, GroupName = "HeThongAPI")]
+    public class OrdersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public OrderController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         // ========================================================
-        // 🌟 HÀM MỚI: LẤY DỮ LIỆU JSON THUẦN TÚY CỦA 1 ĐƠN HÀNG
-        // Đường dẫn test trên Swagger: /Order/GetJson/{id}
+        // 1. API LẤY LỊCH SỬ ĐƠN HÀNG (Dành cho trang MyOrders.jsx)
+        // Đường dẫn: GET api/Orders/customer/{customerId}
         // ========================================================
-        [HttpGet("{id}")]
-        public IActionResult GetJson(int id)
+        [HttpGet("customer/{customerId}")]
+        [AllowAnonymous] // Mở khóa tạm thời để React gọi không bị lỗi 401
+        public async Task<IActionResult> GetOrdersByCustomer(int customerId)
         {
-            // Truy vấn đơn hàng kèm theo thông tin khách hàng liên kết
-            var item = _context.Orders
-                .Include(o => o.Customer)
-                .FirstOrDefault(o => o.Id == id);
-
-            if (item == null)
+            try
             {
-                return NotFound(new { message = $"Không tìm thấy đơn hàng có ID bằng {id}" });
+                var orders = await _context.Orders
+                    .Where(o => o.CustomerId == customerId)
+                    .OrderByDescending(o => o.Id)
+                    .Select(o => new {
+                        id = o.Id,
+                        orderDate = o.OrderDate,
+                        status = o.Status,
+                        notes = o.Notes,
+                        totalAmount = o.OrderDetails.Sum(od => od.Quantity * od.UnitPrice)
+                    })
+                    .ToListAsync();
+
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi nạp lịch sử đơn hàng: {ex.Message}");
+            }
+        }
+
+        // ========================================================
+        // 2. API CHỐT ĐƠN HÀNG VÀ TRỪ KHO (Dành cho trang Checkout.jsx)
+        // Đường dẫn: POST api/Orders
+        // ========================================================
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderInputDto dto)
+        {
+            if (dto == null || dto.OrderDetails == null || dto.OrderDetails.Count == 0)
+            {
+                return BadRequest(new { message = "Gói tin đơn hàng trống rỗng, không thể xử lý!" });
             }
 
-            // ĐỐI SÁCH: Phẳng hóa cấu trúc Object JSON trả về
-            // Giúp bẻ gãy hoàn toàn lỗi sập hệ thống do vòng lặp vô hạn (Object Cycle) giữa Order và Customer
-            return Ok(new
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                item.Id,
-                item.OrderDate,
-                item.TotalAmount,
-                item.Status,
-                item.CustomerId,
-                CustomerName = item.Customer != null ? item.Customer.Fullname : "Khách vãng lai"
-            });
-        }
+                // A. Tạo hóa đơn
+                var newOrder = new Order
+                {
+                    CustomerId = dto.CustomerId,
+                    OrderDate = DateTime.Now,
+                    Status = 0, // 0: Chờ duyệt
+                    Notes = dto.Notes
+                };
 
-        // ========================================================
-        // 1. HIỂN THỊ DANH SÁCH ĐƠN HÀNG (Trả về giao diện HTML)
-        // ========================================================
-        [HttpGet]
-        public IActionResult Index()
-        {
-            var orders = _context.Orders
-                .Include(o => o.Customer)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
+                _context.Orders.Add(newOrder);
+                await _context.SaveChangesAsync();
 
-            return View(orders);
-        }
+                // B. Kiểm tra và trừ kho
+                foreach (var item in dto.OrderDetails)
+                {
+                    var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                    if (product == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return NotFound(new { message = $"Sản phẩm mã #{item.ProductId} không tồn tại!" });
+                    }
 
-        // ========================================================
-        // 2. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (GET - Giao diện HTML)
-        // Đường dẫn chuẩn: /Order/Edit/{id}
-        // ========================================================
-        [HttpGet("{id?}")]
-        public IActionResult Edit(int id)
-        {
-            var order = _context.Orders.Find(id);
-            if (order == null) return NotFound();
+                    if (product.StockQuantity < item.Quantity)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest(new { message = $"Sản phẩm '{product.Name}' chỉ còn {product.StockQuantity} chiếc, không đủ đáp ứng!" });
+                    }
 
-            return View(order);
-        }
+                    product.StockQuantity -= item.Quantity; // Trừ kho vật lý
 
-        // 2. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (POST - Xử lý lưu)
-        [HttpPost("{id?}")]
-        public IActionResult Edit(Order model)
-        {
-            _context.Orders.Update(model);
-            _context.SaveChanges();
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderId = newOrder.Id,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    };
 
-            return RedirectToAction("Index");
-        }
+                    _context.OrderDetails.Add(orderDetail);
+                }
 
-        // ========================================================
-        // 3. XÓA ĐƠN HÀNG KHỎI HỆ THỐNG
-        // Đường dẫn chuẩn: /Order/Delete/{id}
-        // ========================================================
-        [HttpGet("{id?}")]
-        public IActionResult Delete(int id)
-        {
-            var item = _context.Orders.Find(id);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-            if (item != null)
-            {
-                _context.Orders.Remove(item);
-                _context.SaveChanges();
+                return StatusCode(201, new { message = "Ghi nhận đơn hàng thành công!", orderId = newOrder.Id });
             }
-
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Lỗi hệ thống máy chủ C#: {ex.Message}");
+            }
         }
+    }
+
+    // ========================================================
+    // ĐỊNH NGHĨA DTO (Nằm cùng file hoặc tách file riêng đều được)
+    // ========================================================
+    public class OrderInputDto
+    {
+        public int CustomerId { get; set; }
+        public string? Notes { get; set; }
+        public List<OrderDetailInputDto> OrderDetails { get; set; }
+    }
+
+    public class OrderDetailInputDto
+    {
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
     }
 }

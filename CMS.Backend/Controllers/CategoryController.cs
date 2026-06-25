@@ -19,32 +19,19 @@ namespace CMS.Backend.Controllers
         }
 
         // ========================================================
-        // 🌟 HÀM MỚI: LẤY DỮ LIỆU JSON THUẦN TÚY CỦA 1 DANH MỤC
-        // Đường dẫn test trên Swagger: /Category/GetJson/{id}
+        // 🌟 LẤY DỮ LIỆU JSON THUẦN TÚY CỦA 1 DANH MỤC
         // ========================================================
         [HttpGet("{id}")]
         public IActionResult GetJson(int id)
         {
-            // Tìm kiếm danh mục dựa vào ID truyền vào
             var item = _context.Categories.FirstOrDefault(c => c.Id == id);
-
             if (item == null)
             {
                 return NotFound(new { message = $"Không tìm thấy danh mục có ID bằng {id}" });
             }
-
-            // Trả về JSON phẳng gọn gàng, bẻ gãy hoàn toàn lỗi Object Cycle (vòng lặp thực thể)
-            return Ok(new
-            {
-                item.Id,
-                item.Name
-                // Nếu class Category của bạn có thêm trường gì (Ví dụ: Description...), hãy thêm vào đây
-            });
+            return Ok(new { item.Id, item.Name, item.Description });
         }
 
-        // ========================================================
-        // Hiển thị thẳng sạch đẹp trên Swagger: /Category/Index (Trả về HTML)
-        // ========================================================
         [HttpGet]
         public IActionResult Index()
         {
@@ -52,15 +39,13 @@ namespace CMS.Backend.Controllers
             return View(categories);
         }
 
-        // ========================================================
-        // Hiển thị thẳng sạch đẹp trên Swagger: /Category/Create (Trả về HTML)
-        // ========================================================
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
+        // 🌟 HÀM TẠO MỚI DANH MỤC (CHUẨN)
         [HttpPost]
         public IActionResult Create(Category model)
         {
@@ -70,16 +55,17 @@ namespace CMS.Backend.Controllers
                 return View(model);
             }
 
+            // Chống lỗi NULL khi xuống SQL Server
+            if (string.IsNullOrEmpty(model.Description))
+            {
+                model.Description = "Chưa có mô tả";
+            }
+
             _context.Categories.Add(model);
             _context.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
-        // ========================================================
-        // Giao diện chỉnh sửa danh mục (Trả về HTML)
-        // Đường dẫn: /Category/Edit/{id}
-        // ========================================================
         [HttpGet("{id?}")]
         public IActionResult Edit(int id)
         {
@@ -88,6 +74,7 @@ namespace CMS.Backend.Controllers
             return View(category);
         }
 
+        // 🌟 HÀM SỬA DANH MỤC (CHUẨN)
         [HttpPost("{id?}")]
         public IActionResult Edit(Category model)
         {
@@ -97,16 +84,16 @@ namespace CMS.Backend.Controllers
                 return View(model);
             }
 
+            if (string.IsNullOrEmpty(model.Description))
+            {
+                model.Description = "Chưa có mô tả";
+            }
+
             _context.Categories.Update(model);
             _context.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
-        // ========================================================
-        // Tác vụ xóa dữ liệu danh mục
-        // Đường dẫn: /Category/Delete/{id}
-        // ========================================================
         [HttpGet("{id?}")]
         public IActionResult Delete(int id)
         {
