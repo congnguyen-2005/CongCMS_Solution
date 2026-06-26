@@ -1,34 +1,22 @@
-﻿import React, { useState, useContext, useEffect } from 'react';
+﻿import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
-import { AuthContext } from '../contexts/AuthContext'; // 🌟 Import thêm AuthContext
+import { AuthContext } from '../contexts/AuthContext';
 import axiosClient from '../api/axiosClient';
 
 const CheckoutPage = () => {
     const { cartItems, cartTotal, clearCart } = useContext(CartContext);
-    const { user } = useContext(AuthContext); // Lấy thông tin user đăng nhập
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     const [formData, setFormData] = useState({
-        customerName: '',
-        phone: '',
-        address: '',
+        customerName: user?.name || '',
+        phone: user?.phone || '',
+        address: user?.address || '',
         note: ''
     });
-
-    // 🌟 AUTO-FILL: Nếu User đã đăng nhập, tự điền tên và SĐT
-    useEffect(() => {
-        if (user) {
-            setFormData(prev => ({
-                ...prev,
-                customerName: user.name || user.fullName || '',
-                phone: user.phone || '',
-                address: user.address || ''
-            }));
-        }
-    }, [user]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,45 +27,51 @@ const CheckoutPage = () => {
         setIsLoading(true);
         setErrorMsg('');
 
+        // Validation Regex
+        const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+        const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+
+        if (!nameRegex.test(formData.customerName)) {
+            setErrorMsg('⛔ Họ tên không hợp lệ!');
+            setIsLoading(false);
+            return;
+        }
+        if (!phoneRegex.test(formData.phone)) {
+            setErrorMsg('⛔ Số điện thoại không hợp lệ!');
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            // 🌟 CHUẨN HÓA DỮ LIỆU ĐỂ BẮN XUỐNG C# OrdersController
+            // 🌟 Cấu trúc Payload khớp 100% với Backend CheckoutRequest
             const payload = {
-                customerId: user?.id || 13, // Nếu ko có user ID thì gán 13 như SQL của bạn
                 notes: `[Tên: ${formData.customerName}] [SĐT: ${formData.phone}] [Địa chỉ: ${formData.address}] [Ghi chú: ${formData.note}]`,
-                orderDetails: cartItems.map(item => ({
+                items: cartItems.map(item => ({
                     productId: item.id,
                     quantity: item.quantity,
                     unitPrice: item.price
                 }))
             };
 
-            // Gọi API chốt đơn (Sửa đường dẫn thành /Orders cho khớp với C# API)
-            const response = await axiosClient.post('/Orders', payload);
+            // 🌟 Gọi đúng endpoint đã định nghĩa trong Controller
+            await axiosClient.post('/Checkout/PlaceOrder', payload);
 
-            alert(response.data?.message || response.message || "🎉 Đặt hàng thành công! Hệ thống đã trừ kho tự động.");
+            alert("🎉 Đặt hàng thành công!");
             clearCart();
-            navigate('/my-orders'); // Chuyển sang lịch sử mua hàng
+            navigate('/my-orders');
 
         } catch (error) {
-            console.error("Lỗi đặt hàng:", error);
-
-            // 🌟 CHỐT CHẶN: BẮT LỖI TỒN KHO TỪ BACKEND C# (Status 400)
-            if (error.response && error.response.status === 400) {
-                const serverMsg = error.response.data?.message;
-                setErrorMsg(`⛔ Thất bại: ${serverMsg}`);
-            } else {
-                setErrorMsg("⛔ Lỗi Server: Không thể xử lý giao dịch lúc này. Hãy F12 kiểm tra Console.");
-            }
+            console.error("Lỗi đặt hàng:", error.response?.data);
+            setErrorMsg(error.response?.data?.message || "Lỗi hệ thống, vui lòng thử lại!");
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Đã xóa cú pháp lặp lỗi ở đây
     if (cartItems.length === 0) {
         return (
             <div className="container mt-5 pt-5 text-center">
-                <h4 className="text-white">Giỏ hàng rỗng! Bạn không thể thanh toán.</h4>
+                <h4 className="text-white">Giỏ hàng rỗng!</h4>
                 <button className="btn btn-cyber mt-3" onClick={() => navigate('/shop')}>Quay lại Cửa hàng</button>
             </div>
         );
@@ -86,87 +80,47 @@ const CheckoutPage = () => {
     return (
         <div className="container mt-5 pt-4 mb-5 pb-5">
             <h2 className="font-weight-bold text-white mb-4">THÔNG TIN THANH TOÁN</h2>
-
-            {errorMsg && (
-                <div className="alert alert-danger font-weight-bold mb-4 border-left-danger shadow-sm">
-                    <i className="fa-solid fa-triangle-exclamation mr-2"></i> {errorMsg}
-                </div>
-            )}
+            {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
 
             <div className="row">
                 <div className="col-lg-7 mb-4">
                     <div className="glass-card p-4">
-                        <h5 className="font-weight-bold text-neon border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
-                            Thông Tin Giao Hàng
-                        </h5>
                         <form onSubmit={handlePlaceOrder} id="checkoutForm">
-                            <div className="row">
-                                <div className="form-group col-md-6 mb-3">
-                                    <label className="text-white small">Họ và tên người nhận <span className="text-danger">*</span></label>
-                                    <input type="text" name="customerName" className="form-control bg-dark text-white border-secondary" required
-                                        value={formData.customerName} onChange={handleInputChange} />
-                                </div>
-                                <div className="form-group col-md-6 mb-3">
-                                    <label className="text-white small">Số điện thoại <span className="text-danger">*</span></label>
-                                    <input type="tel" name="phone" className="form-control bg-dark text-white border-secondary" required
-                                        value={formData.phone} onChange={handleInputChange} />
-                                </div>
+                            <div className="form-group mb-3">
+                                <label className="text-white small">Họ và tên <span className="text-danger">*</span></label>
+                                <input type="text" name="customerName" className="form-control" required value={formData.customerName} onChange={handleInputChange} />
                             </div>
                             <div className="form-group mb-3">
-                                <label className="text-white small">Địa chỉ nhận hàng chi tiết <span className="text-danger">*</span></label>
-                                <input type="text" name="address" className="form-control bg-dark text-white border-secondary" required
-                                    placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/TP"
-                                    value={formData.address} onChange={handleInputChange} />
+                                <label className="text-white small">Số điện thoại <span className="text-danger">*</span></label>
+                                <input type="tel" name="phone" className="form-control" required value={formData.phone} onChange={handleInputChange} />
                             </div>
                             <div className="form-group mb-3">
-                                <label className="text-white small">Ghi chú thêm cho shipper (Tùy chọn)</label>
-                                <textarea name="note" className="form-control bg-dark text-white border-secondary" rows="3"
-                                    value={formData.note} onChange={handleInputChange}></textarea>
+                                <label className="text-white small">Địa chỉ <span className="text-danger">*</span></label>
+                                <input type="text" name="address" className="form-control" required value={formData.address} onChange={handleInputChange} />
+                            </div>
+                            <div className="form-group mb-3">
+                                <label className="text-white small">Ghi chú</label>
+                                <textarea name="note" className="form-control" rows="3" value={formData.note} onChange={handleInputChange}></textarea>
                             </div>
                         </form>
                     </div>
                 </div>
 
                 <div className="col-lg-5">
-                    <div className="glass-card p-4 sticky-top" style={{ top: '100px' }}>
-                        <h5 className="font-weight-bold text-white border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
-                            Tóm Tắt Đơn Hàng
-                        </h5>
-                        <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="mb-4 pr-2 custom-scrollbar">
-                            {cartItems.map(item => (
-                                <div key={item.id} className="d-flex justify-content-between mb-3 align-items-center">
-                                    <div className="d-flex align-items-center" style={{ maxWidth: '70%' }}>
-                                        <span className="badge badge-secondary mr-2">{item.quantity}x</span>
-                                        <span className="text-muted text-truncate">{item.name}</span>
-                                    </div>
-                                    <span className="font-weight-bold text-white">
-                                        {new Intl.NumberFormat('vi-VN').format(item.price * item.quantity)}đ
-                                    </span>
-                                </div>
-                            ))}
+                    <div className="glass-card p-4">
+                        <h5 className="text-white border-bottom pb-2 mb-3">Tóm Tắt Đơn Hàng</h5>
+                        {cartItems.map(item => (
+                            <div key={item.id} className="d-flex justify-content-between mb-2">
+                                <span>{item.quantity}x {item.name}</span>
+                                <span>{new Intl.NumberFormat('vi-VN').format(item.price * item.quantity)}đ</span>
+                            </div>
+                        ))}
+                        <hr className="bg-light" />
+                        <div className="d-flex justify-content-between h4 text-neon">
+                            <span>Tổng tiền:</span>
+                            <span>{new Intl.NumberFormat('vi-VN').format(cartTotal)}đ</span>
                         </div>
-
-                        <div className="d-flex justify-content-between mb-3 text-muted">
-                            <span>Tạm tính:</span>
-                            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)}</span>
-                        </div>
-                        <div className="d-flex justify-content-between mb-4 text-muted border-bottom pb-4" style={{ borderColor: 'rgba(255,255,255,0.1) !important' }}>
-                            <span>Phí giao hàng:</span>
-                            <span className="text-success">Miễn phí</span>
-                        </div>
-                        <div className="d-flex justify-content-between mb-4">
-                            <span className="h5 text-white">Tổng thanh toán:</span>
-                            <span className="h4 font-weight-bold text-neon">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)}
-                            </span>
-                        </div>
-
-                        <button
-                            type="submit"
-                            form="checkoutForm"
-                            className="btn btn-cyber btn-block py-3 w-100 font-weight-bold"
-                            disabled={isLoading}
-                        >
+                        <button type="submit" form="checkoutForm" className="btn btn-cyber btn-block mt-4" disabled={isLoading}>
                             {isLoading ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN ĐẶT HÀNG'}
                         </button>
                     </div>

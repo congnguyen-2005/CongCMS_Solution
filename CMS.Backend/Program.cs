@@ -1,7 +1,7 @@
 ﻿using CMS.data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.SwaggerGen; // Bắt buộc để dùng hàm TryGetMethodInfo
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Cụm tài liệu 1: Quản lý các cổng giao diện điều hướng Admin
     c.SwaggerDoc("GiaoDienAdmin", new global::Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "ThaiCMS - Giao Diện Admin",
@@ -28,7 +27,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Hệ thống quản lý điều hướng các trang chức năng MVC View (.cshtml)"
     });
 
-    // Cụm tài liệu 2: Quản lý hệ thống API thô (JSON) phục vụ Mobile App / ReactJS
     c.SwaggerDoc("HeThongAPI", new global::Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "ThaiCMS - Hệ Thống API Kết Nối",
@@ -36,35 +34,27 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Các đầu cổng dịch vụ xử lý dữ liệu bất đồng bộ trả về chuỗi JSON thô"
     });
 
-    // BỘ LỌC ĐỒNG BỘ: Ép Swagger tự động nhặt Controller bỏ vào đúng nhóm dựa trên GroupName
     c.DocInclusionPredicate((docName, apiDesc) => apiDesc.GroupName == docName);
-
-    // Giúp Swagger lấy chính xác tên hàm làm ID hành động để chạy test, tránh trùng lặp endpoint
     c.CustomOperationIds(apiDesc => apiDesc.TryGetMethodInfo(out var methodInfo) ? methodInfo.Name : null);
 });
 
-// Cấu hình chính sách CORS (Mở cửa cho ReactJS hoặc các ứng dụng bên thứ ba gọi API)
+// 🌟 CẤU HÌNH CORS CHUẨN: Mở cửa cho ReactJS
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // Cho phép ReactJS ở port 3000 gọi tới
-              .AllowAnyHeader()                     // Cho phép mọi loại Header (Content-Type, Authorization...)
-              .AllowAnyMethod()                     // Cho phép mọi phương thức HTTP (GET, POST, PUT, DELETE)
-              .AllowCredentials();                  // Hỗ trợ truyền Cookie/Session nếu cần sau này
+        policy.WithOrigins("http://localhost:3000") // Trỏ đúng cổng của React
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
-// Cấu hình bảo mật Cookie (Tự động chặn quyền & chuyển hướng trang 401, 403)
+// Cấu hình bảo mật Cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        // Khi người dùng chưa đăng nhập cố tình vào trang quản trị (401), tự đẩy về trang đăng nhập
         options.LoginPath = "/Account/Login";
-
-        // Khi tài khoản Editor cố tình truy cập vào vùng Admin (403), tự đẩy về trang AccessDenied
         options.AccessDeniedPath = "/Account/AccessDenied";
-
-        // Thời gian duy trì phiên làm việc Cookie trên trình duyệt
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     });
 
@@ -80,39 +70,34 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(); // 🌟 Chỉ gọi 1 lần ở đây để nạp CSS/JS/Ảnh
 
-// KÍCH HOẠT SWAGGER & ĐỊNH TUYẾN GIAO DIỆN KIỂM THỬ TÁCH BIỆT KHÔNG GÂY LỖI 404
+// KÍCH HOẠT SWAGGER
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    // Tạo 2 dòng tùy chọn tài liệu trên thanh Dropdown nằm ở góc trên bên phải trang Swagger
     c.SwaggerEndpoint("/swagger/GiaoDienAdmin/swagger.json", "1. Hệ Thống Điều Hướng Admin");
     c.SwaggerEndpoint("/swagger/HeThongAPI/swagger.json", "2. Các API Phục Vụ Kết Nối");
-
-    c.RoutePrefix = "swagger"; // Đường dẫn truy cập trang test: https://localhost:xxxx/swagger
+    c.RoutePrefix = "swagger";
 });
 
-// --- SẮP XẾP LẠI THỨ TỰ PIPELINE CHUẨN ĐỂ KHÔNG BỊ LẶP LINK ---
+// 🌟 SẮP XẾP THỨ TỰ PIPELINE CỐT LÕI (TUYỆT ĐỐI KHÔNG ĐẢO LỘN VỊ TRÍ NÀY)
 app.UseRouting();
 
-// 1. Kích hoạt CORS (Dùng đúng tên "AllowReactApp" đã đăng ký ở trên)
+// CORS bắt buộc phải nằm giữa Routing và Auth
 app.UseCors("AllowReactApp");
 
-// 2. Kiểm tra danh tính người dùng (Đọc Cookie) TRƯỚC
 app.UseAuthentication();
-app.UseStaticFiles();
-// 3. Kiểm tra quyền truy cập vào Controller SAU
 app.UseAuthorization();
 
 // ===============================================================
 // 3. KHU VỰC ĐỊNH TUYẾN PHÂN LUỒNG ÁNH XẠ (ROUTING MAP)
 // ===============================================================
 
-// Phân luồng A: Ánh xạ cấu trúc cho các Web API (Các hàm xử lý dữ liệu thô JSON)
+// Phân luồng A: Cho Web API
 app.MapControllers();
 
-// Phân luồng B: Ánh xạ đường dẫn cho giao diện Web MVC truyền thức (.cshtml)
+// Phân luồng B: Cho Web MVC (.cshtml)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -9,6 +9,7 @@ const Header = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
     const { cartCount } = useContext(CartContext);
+    console.log("Cart Count hiện tại:", cartCount);
     const [showComingSoon, setShowComingSoon] = useState(false);
     const { user, logout } = useContext(AuthContext);
     // 🌟 2. Hàm xử lý khi bấm nút Đăng nhập

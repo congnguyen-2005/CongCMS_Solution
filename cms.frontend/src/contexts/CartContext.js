@@ -1,72 +1,66 @@
-﻿import React, { createContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useState, useEffect, useContext } from 'react';
+import { AuthContext } from './AuthContext'; // Đảm bảo đúng đường dẫn tới AuthContext
 
-// Tạo Context
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    // 1. Khởi tạo giỏ hàng từ Local Storage (để F5 không bị mất hàng)
-    const [cartItems, setCartItems] = useState(() => {
-        const savedCart = localStorage.getItem('cameraClick_cart');
-        return savedCart ? JSON.parse(savedCart) : [];
-    });
-
-    // 2. Mỗi khi giỏ hàng thay đổi, lưu lại ngay vào Local Storage
-    useEffect(() => {
-        localStorage.setItem('cameraClick_cart', JSON.stringify(cartItems));
-    }, [cartItems]);
-
-    // 3. Hàm thêm vào giỏ
-    const addToCart = (product, quantity = 1) => {
-        setCartItems((prevItems) => {
-            const existingItem = prevItems.find(item => item.id === product.id);
-            if (existingItem) {
-                // Nếu đã có trong giỏ, chỉ tăng số lượng
-                return prevItems.map(item =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
-                );
-            }
-            // Nếu chưa có, thêm mới hoàn toàn
-            return [...prevItems, { ...product, quantity }];
-        });
-    };
-
-    // 4. Hàm xóa khỏi giỏ
-    const removeFromCart = (id) => {
-        setCartItems((prevItems) => prevItems.filter(item => item.id !== id));
-    };
-
-    // 5. Hàm cập nhật số lượng (+ / -)
-    const updateQuantity = (id, newQuantity) => {
-        if (newQuantity < 1) return; // Không cho giảm xuống dưới 1
-        setCartItems((prevItems) =>
-            prevItems.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            )
-        );
-    };
-
-    // 🌟 6. Hàm dọn sạch giỏ hàng (Bắt buộc phải nằm TRƯỚC lệnh return)
-    const clearCart = () => {
-        setCartItems([]);
-    };
-
-    // 7. Tính tổng số lượng và tổng tiền
+    const { user } = useContext(AuthContext); // Lấy thông tin user đang đăng nhập
+    const [cartItems, setCartItems] = useState([]);
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+    // 🌟 THUẬT TOÁN ĐỊNH DANH GIỎ HÀNG: Tạo key lưu trữ riêng cho từng ID cá nhân
+    const getCartStorageKey = () => {
+        return user ? `cart_user_${user.id}` : 'cart_guest';
+    };
+
+    // TỰ ĐỘNG ĐỔI GIỎ HÀNG: Mỗi khi user đăng nhập hoặc đổi tài khoản, nạp lại dữ liệu tương ứng
+    useEffect(() => {
+        const storedCart = localStorage.getItem(getCartStorageKey());
+        setCartItems(storedCart ? JSON.parse(storedCart) : []);
+    }, [user]);
+
+    // Hàm bổ trợ lưu trữ trạng thái giỏ hàng vào đúng ngăn chứa
+    const saveCartToStorage = (updatedItems) => {
+        setCartItems(updatedItems);
+        localStorage.setItem(getCartStorageKey(), JSON.stringify(updatedItems));
+    };
+
+    const addToCart = (product, quantity = 1) => {
+        const existingItem = cartItems.find(item => item.id === product.id);
+        let newItems = [];
+        if (existingItem) {
+            newItems = cartItems.map(item =>
+                item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+            );
+        } else {
+            newItems = [...cartItems, { ...product, quantity }];
+        }
+        saveCartToStorage(newItems);
+    };
+
+    const removeFromCart = (id) => {
+        const newItems = cartItems.filter(item => item.id !== id);
+        saveCartToStorage(newItems);
+    };
+
+    const updateQuantity = (id, quantity) => {
+        if (quantity <= 0) {
+            removeFromCart(id);
+            return;
+        }
+        const newItems = cartItems.map(item =>
+            item.id === id ? { ...item, quantity } : item
+        );
+        saveCartToStorage(newItems);
+    };
+
+    const clearCart = () => {
+        saveCartToStorage([]);
+    };
+
     const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-    // 8. CHỈ CÓ DUY NHẤT 1 LỆNH RETURN Ở CUỐI CÙNG
     return (
-        <CartContext.Provider value={{
-            cartItems,
-            addToCart,
-            removeFromCart,
-            updateQuantity,
-            cartCount,
-            cartTotal,
-            clearCart // Đã thêm hàm này thành công
-        }}>
+        <CartContext.Provider value={{ cartItems, cartCount, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal }}>
             {children}
         </CartContext.Provider>
     );

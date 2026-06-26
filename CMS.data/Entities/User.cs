@@ -8,6 +8,8 @@ namespace CMS.data.Entities
 {
     public class User
     {
+        public string Password;
+
         public int Id { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }

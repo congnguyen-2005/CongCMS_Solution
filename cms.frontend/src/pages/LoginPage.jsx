@@ -1,30 +1,36 @@
 ﻿import React, { useState, useContext } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom'; // 🌟 Thêm useLocation
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMsg, setErrorMsg] = useState(''); // 🌟 Thêm State báo lỗi công khai
     const navigate = useNavigate();
-    const location = useLocation(); // 🌟 Lấy thông tin URL hiện tại
+    const location = useLocation();
     const { login } = useContext(AuthContext);
 
-    // 🌟 Đọc xem có yêu cầu quay lại trang nào không, nếu không thì về Trang chủ '/'
     const redirectUrl = new URLSearchParams(location.search).get('redirect') || '/';
 
+    // 🌟 LOGIC XỬ LÝ ĐĂNG NHẬP ĐỐI CHIẾU
     const handleLogin = (e) => {
         e.preventDefault();
+        setErrorMsg(''); // Reset lại thông báo lỗi cũ
 
-        if (email && password) {
-            const mockUser = {
-                id: 13, // Khớp với SQL của bạn
-                name: "Khách hàng VIP",
-                email: email,
-                role: "User"
-            };
-            login(mockUser);
-            // 🌟 Đăng nhập xong thì đá về đúng cái trang vừa yêu cầu (Checkout)
+        // 1. Lấy danh sách tài khoản đã đăng ký trên máy ra
+        const registeredUsers = JSON.parse(localStorage.getItem('registered_users')) || [];
+
+        // 2. Tìm kiếm tài khoản khớp chính xác cả Email và Mật khẩu
+        const foundUser = registeredUsers.find(u => u.email === email && u.password === password);
+
+        if (foundUser) {
+            // Nếu tìm thấy: Kích hoạt trạng thái đăng nhập hệ thống
+            login(foundUser);
+            alert(`🎉 Chào mừng ${foundUser.name} đã quay trở lại hệ thống!`);
             navigate(redirectUrl);
+        } else {
+            // Nếu không tìm thấy: Báo lỗi, không cho vào trang web
+            setErrorMsg('❌ Email hoặc mật khẩu không đúng, hoặc tài khoản chưa được tạo!');
         }
     };
 
@@ -36,8 +42,11 @@ const LoginPage = () => {
                         <h3 className="text-center text-white font-weight-bold mb-4" style={{ letterSpacing: '2px' }}>
                             ĐĂNG <span className="text-neon">NHẬP</span>
                         </h3>
+
+                        {/* Hiển thị lỗi đỏ ra màn hình nếu gõ sai */}
+                        {errorMsg && <div className="alert alert-danger py-2 text-center small font-weight-bold">{errorMsg}</div>}
+
                         <form onSubmit={handleLogin}>
-                            {/* ... Các ô input Email và Password giữ nguyên ... */}
                             <div className="form-group mb-4">
                                 <label className="text-muted small font-weight-bold">EMAIL</label>
                                 <input type="email" className="form-control bg-dark text-white border-secondary py-4" value={email} onChange={(e) => setEmail(e.target.value)} required />

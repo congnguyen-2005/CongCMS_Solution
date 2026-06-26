@@ -18,10 +18,12 @@ import { AuthProvider } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import MyOrders from './pages/auth/MyOrders';
 import ProfilePage from './pages/auth/Profile';
+import { CartProvider } from './contexts/CartContext';
 function App() {
     return (
         // 🌟 1. BỌC TOÀN BỘ APP BẰNG AUTH_PROVIDER ĐỂ LƯU TRẠNG THÁI USER
         <AuthProvider>
+            <CartProvider>
             <MainLayout>
                 <Routes>
                     {/* 1. Trang chủ: Hiện tất cả mọi thứ bao gồm cả sản phẩm */}
@@ -49,6 +51,7 @@ function App() {
                     <Route path="/profile" element={<ProfilePage />} />
                 </Routes>
             </MainLayout>
+        </CartProvider>
         </AuthProvider>
     );
 }
