@@ -34,24 +34,19 @@ namespace CMS.Backend.Controllers
             {
                 var orders = await _context.Orders
                     .Where(o => o.CustomerId == customerId)
+                    // 🌟 Nạp chi tiết đơn và thông tin sản phẩm
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
                     .OrderByDescending(o => o.Id)
-                    .Select(o => new {
-                        id = o.Id,
-                        orderDate = o.OrderDate,
-                        status = o.Status,
-                        notes = o.Notes,
-                        totalAmount = o.OrderDetails.Sum(od => od.Quantity * od.UnitPrice)
-                    })
                     .ToListAsync();
 
                 return Ok(orders);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Lỗi nạp lịch sử đơn hàng: {ex.Message}");
+                return StatusCode(500, $"Lỗi: {ex.Message}");
             }
         }
-
         // ========================================================
         // 2. API CHỐT ĐƠN HÀNG VÀ TRỪ KHO (Dành cho trang Checkout.jsx)
         // Đường dẫn: POST api/Orders

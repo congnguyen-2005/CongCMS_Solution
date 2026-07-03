@@ -6,8 +6,18 @@ export const AuthProvider = ({ children }) => {
     // 🌟 SỬA TẠI ĐÂY: Dùng kỹ thuật Lazy Initialization
     // React sẽ đọc localStorage ngay lặp tức trong quá trình khởi tạo state
     const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : null;
+        try {
+            const storedUser = localStorage.getItem("user");
+
+            if (!storedUser || storedUser === "undefined") {
+                return null;
+            }
+
+            return JSON.parse(storedUser);
+        } catch (e) {
+            localStorage.removeItem("user");
+            return null;
+        }
     });
 
     // Hàm xử lý khi user đăng nhập thành công

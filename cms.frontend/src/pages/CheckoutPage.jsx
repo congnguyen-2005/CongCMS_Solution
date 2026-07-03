@@ -27,6 +27,7 @@ const CheckoutPage = () => {
         setIsLoading(true);
         setErrorMsg('');
 
+
         // Validation Regex
         const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
         const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
@@ -43,8 +44,9 @@ const CheckoutPage = () => {
         }
 
         try {
-            // 🌟 Cấu trúc Payload khớp 100% với Backend CheckoutRequest
             const payload = {
+                // 🌟 Gửi ID người đăng nhập lên, nếu chưa đăng nhập thì gửi null
+                customerId: user?.id || null,
                 notes: `[Tên: ${formData.customerName}] [SĐT: ${formData.phone}] [Địa chỉ: ${formData.address}] [Ghi chú: ${formData.note}]`,
                 items: cartItems.map(item => ({
                     productId: item.id,
@@ -53,16 +55,14 @@ const CheckoutPage = () => {
                 }))
             };
 
-            // 🌟 Gọi đúng endpoint đã định nghĩa trong Controller
+            // Gửi request
             await axiosClient.post('/Checkout/PlaceOrder', payload);
 
             alert("🎉 Đặt hàng thành công!");
             clearCart();
             navigate('/my-orders');
-
         } catch (error) {
-            console.error("Lỗi đặt hàng:", error.response?.data);
-            setErrorMsg(error.response?.data?.message || "Lỗi hệ thống, vui lòng thử lại!");
+            setErrorMsg(error.response?.data?.message || "Lỗi đặt hàng!");
         } finally {
             setIsLoading(false);
         }

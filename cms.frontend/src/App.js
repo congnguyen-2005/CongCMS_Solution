@@ -19,6 +19,7 @@ import LoginPage from './pages/LoginPage';
 import MyOrders from './pages/auth/MyOrders';
 import ProfilePage from './pages/auth/Profile';
 import { CartProvider } from './contexts/CartContext';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 function App() {
     return (
         // 🌟 1. BỌC TOÀN BỘ APP BẰNG AUTH_PROVIDER ĐỂ LƯU TRẠNG THÁI USER
@@ -48,7 +49,8 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/my-orders" element={<MyOrders />} />
-                    <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 </Routes>
             </MainLayout>
         </CartProvider>
