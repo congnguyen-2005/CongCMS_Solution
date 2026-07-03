@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Nhận diện cả MVC Controller (View) và API Controller
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<CMS.Backend.Services.EmailService>();
 
 // Cấu hình Kết nối Cơ sở dữ liệu SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -57,7 +58,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     });
-
+builder.Services.AddTransient<CMS.Backend.Services.EmailService>();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+       
+    });
 var app = builder.Build();
 
 // ==============================================================
@@ -104,9 +111,6 @@ app.MapControllerRoute(
 
 app.Run();
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Giữ nguyên chữ hoa/thường của C#
-    });
+
+
+// Thêm dòng này để hệ thống nhận diện được EmailService

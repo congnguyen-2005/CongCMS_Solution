@@ -12,7 +12,8 @@ namespace CMS.data.Entities
     {
         [Key]
         public int Id { get; set; }
-
+        // Trong class Product
+        public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
         [Required(ErrorMessage = "Ten san pham khong duoc de trong")]
         public string Name { get; set; }
         public string? Description { get; set; }
@@ -27,6 +28,7 @@ namespace CMS.data.Entities
 
         [ForeignKey("CategoryProductId")]
         public virtual CategoryProduct? CategoryProduct { get; set; }
+        //public object OrderDetails { get; set; }
 
         // ĐÃ XÓA DÒNG public object Category ĐỂ TRÁNH LỖI BIÊN DỊCH
     }

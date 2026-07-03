@@ -3,13 +3,14 @@ import BannerSlider from '../components/BannerSlider';
 import CategoryProductList from '../components/CategoryProductList';
 import ProductList from '../components/ProductList';
 import PostList from '../components/PostList';
+import HotProducts from '../components/HotProducts';
 
 const Home = () => {
     return (
         <div>
             {/* 1. Khối Banner hoành tráng */}
             <BannerSlider />
-
+            <HotProducts />
             <div className="container mb-5 mt-5 pb-5">
                 {/* 2. Khối hiển thị tất cả sản phẩm và phân loại */}
                 <div className="row mb-5">
@@ -27,6 +28,7 @@ const Home = () => {
                         <PostList />
                     </div>
                 </div>
+                
             </div>
         </div>
     );

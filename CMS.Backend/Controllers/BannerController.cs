@@ -12,6 +12,7 @@ namespace CMS.Backend.Controllers
 {
     [Authorize]
     [ApiExplorerSettings(IgnoreApi = true)]
+
     public class BannerController : Controller
     {
         private readonly ApplicationDbContext _context;

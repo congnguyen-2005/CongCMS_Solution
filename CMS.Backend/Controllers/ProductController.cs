@@ -1,5 +1,6 @@
 ﻿using CMS.data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace CMS.Backend.Controllers
@@ -66,5 +67,34 @@ namespace CMS.Backend.Controllers
 
             return Ok(product);
         }
+        [HttpGet("hot-products")]
+        public IActionResult GetHotProducts()
+        {
+            try
+            {
+                var hotProducts = (
+                    from p in _context.Products
+                    join od in _context.OrderDetails
+                        on p.Id equals od.ProductId into g
+                    select new
+                    {
+                        p.Id,
+                        p.Name,
+                        p.Price,
+                        p.ImageUrl,
+                        TotalSold = g.Sum(x => (int?)x.Quantity) ?? 0
+                    })
+                    .OrderByDescending(x => x.TotalSold)
+                    .Take(3)
+                    .ToList();
+
+                return Ok(hotProducts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.ToString());
+            }
+        }
     }
+    
 }

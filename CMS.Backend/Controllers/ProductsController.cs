@@ -208,5 +208,7 @@ namespace CMS.Backend.Controllers
             // 3. Trả về đúng file giao diện Details.cshtml kèm cục dữ liệu Model
             return View(product);
         }
+  
+        
     }
 }
